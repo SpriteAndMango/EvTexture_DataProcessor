@@ -4,13 +4,11 @@ import numpy as np
 import cv2
 import math
 import torch
-# from abc import ABCMeta, abstractmethod
-# import h5py
 from datetime import datetime, timedelta
 
 
 
-config = {
+config_images = {
 	'refractory_period': 1e-4,
 	'CT_range': [0.05, 0.5],
 	'max_CT': 0.5,
@@ -18,11 +16,23 @@ config = {
 	'mu': 1,
 	'sigma': 0.1,
 	'H': 180,
-	'W': 240,
+	'W': 320,
 	'log_eps': 1e-3,
 	'use_log': True,
 }
 
+config_video = {
+	'refractory_period': 1e-4,
+	'CT_range': [0.05, 0.5],
+	'max_CT': 0.5,
+	'min_CT': 0.02,
+	'mu': 1,
+	'sigma': 0.1,
+	'H': 420,
+	'W': 420,
+	'log_eps': 1e-3,
+	'use_log': True,
+}
 
 def render(x, y, t, p, shape):
     img = np.full(shape=shape + [3], fill_value=255, dtype="uint8")
@@ -217,19 +227,19 @@ def voxel_normalization(voxel):
 
 
 if __name__ == "__main__":
-    Cp = random.uniform(config['CT_range'][0], config['CT_range'][1])
-    Cn = random.gauss(config['mu'], config['sigma']) * Cp
-    Cp = min(max(Cp, config['min_CT']), config['max_CT'])
-    Cn = min(max(Cn, config['min_CT']), config['max_CT'])
+
+	
+    ###         Generate voxel grids for images
+	
+    Cp = random.uniform(config_images['CT_range'][0], config_images['CT_range'][1])
+    Cn = random.gauss(config_images['mu'], config_images['sigma']) * Cp
+    Cp = min(max(Cp, config_images['min_CT']), config_images['max_CT'])
+    Cn = min(max(Cn, config_images['min_CT']), config_images['max_CT'])
     esim = esim_py.EventSimulator(Cp,
                                 Cn,
-                                config['refractory_period'],
-                                config['log_eps'],
-                                config['use_log'])
-    # esim.setParameters(Cp, Cn, config['refractory_period'], config['log_eps'], config['use_log'])
-
-
-    ###         Generate voxel grids for images
+                                config_images['refractory_period'],
+                                config_images['log_eps'],
+                                config_images['use_log'])
 
     start_time = round(0.0,4)
     interval = round(1/(4*30),4)
@@ -241,8 +251,8 @@ if __name__ == "__main__":
     
 
 
-    image_folder = "/home/yyz/Codes/rpg_vid2e/esim_py/vid_out/"
-    timestamps_file = "/home/yyz/Codes/rpg_vid2e/esim_py/tests/data/images/timestamps.txt"
+    image_folder = "./frame_interpolation_dataset"
+    timestamps_file = "./timestamps.txt"
     
     with open(timestamps_file, 'w') as f:
         for ts in timestamps:
@@ -274,7 +284,6 @@ if __name__ == "__main__":
     print(normed_voxel_images.shape)
 
 
-    print(events_images)
     for img in render_events(events_images):
         cv2.imshow("img", img)
         if cv2.waitKey(0) & 0xFF == 27:  # 如果按下的是Esc键
@@ -283,8 +292,16 @@ if __name__ == "__main__":
 
     ###         Generate voxel grids for video
 
+    Cp = random.uniform(config_video['CT_range'][0], config_video['CT_range'][1])
+    Cn = random.gauss(config_video['mu'], config_video['sigma']) * Cp
+    Cp = min(max(Cp, config_video['min_CT']), config_video['max_CT'])
+    Cn = min(max(Cn, config_video['min_CT']), config_video['max_CT'])
+    esim = esim_py.EventSimulator(Cp,
+                                Cn,
+                                config_video['refractory_period'],
+                                config_video['log_eps'],
+                                config_video['use_log'])
     video_time = 6
-    fire_xiaojie_path = "/home/yyz/Codes/rpg_vid2e/esim_py/fire_xiaojie.mp4"
     fps = 25
     frames = fps*video_time
 
@@ -296,11 +313,12 @@ if __name__ == "__main__":
         timestamps.append(round(timestamp, 4))
     
 
-
-    video_timestamps_path = '/home/yyz/Codes/rpg_vid2e/esim_py/video_timestamps.txt'
+    fire_xiaojie_path = "./fire_xiaojie.mp4"
+    video_timestamps_path = './video_timestamps.txt'
     with open(video_timestamps_path, 'w') as f:
         for ts in timestamps:
             f.write(f'{ts}\n')
+    f.close()
 
     events_video = esim.generateFromVideo(fire_xiaojie_path, video_timestamps_path)
 
@@ -311,7 +329,7 @@ if __name__ == "__main__":
     t_start = ts[0]
     t_end = ts[-1]
     bins = 10
-    sensor_size = (180, 320)
+    sensor_size = (420, 420)
 
     backward = False
 

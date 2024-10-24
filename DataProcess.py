@@ -222,6 +222,9 @@ if __name__ == "__main__":
                                 config['log_eps'],
                                 config['use_log'])
 
+
+###		Generate voxel grids for images
+	
     start_time = round(0.0,4)
     interval = round(1/(4*30),4)
     timestamps = []
@@ -268,3 +271,26 @@ if __name__ == "__main__":
         cv2.imshow("img", img)
         if cv2.waitKey(0) & 0xFF == 27:  # 如果按下的是Esc键
             break
+
+
+
+###			Generate voxel grids for vedio
+
+     start_time = round(0.0,4)
+     fps = 25.0
+     intervel = round(1/fps,4)
+     timestamps = []
+
+	
+
+
+
+
+
+
+
+
+
+
+
+

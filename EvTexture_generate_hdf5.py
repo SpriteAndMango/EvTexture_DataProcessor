@@ -438,9 +438,9 @@ if __name__ == "__main__":
 
 
 
-    fire_xiaojie_path = "/home/yyz/Codes/rpg_vid2e/esim_py/fire_xiaojie.mp4"
-    output_folder = '/home/yyz/Codes/rpg_vid2e/esim_py/video_to_images/'
-    # video_to_images(fire_xiaojie_path,output_folder)
+    fire_xiaojie_path = "./fire_xiaojie.mp4"
+    output_folder = './Fire_Original_Dataset/'			
+    video_to_images(fire_xiaojie_path,output_folder)			### Generate 140 pictures
 
     video_frames = 140
     video_time = 6
@@ -452,11 +452,10 @@ if __name__ == "__main__":
     for i in range(4*video_frames+1):
         timestamp = start_time + i * interval
         timestamps.append(round(timestamp, 4))
-    
 
-
-    image_folder = "/home/yyz/Codes/rpg_vid2e/esim_py/vid_out/"
-    timestamps_file = "/home/yyz/Codes/rpg_vid2e/esim_py/tests/data/images/timestamps.txt"
+	
+    image_folder = "./Fire_Interpolation_Dataset/"
+    timestamps_file = "./video_timestamps.txt"
     
     # with open(timestamps_file, 'w') as f:
     #     for ts in timestamps:
@@ -464,7 +463,7 @@ if __name__ == "__main__":
     # f.close()
 
     events_images = esim.generateFromFolder(image_folder, timestamps_file) # Generate events with shape [N, 4]
-    # events_images_save_path = "/home/yyz/Codes/rpg_vid2e/esim_py/events_images/"
+    # events_images_save_path = "./Results/"
     # save_events_images(events_images,events_images_save_path)
     # np.savetxt(os.path.join(events_images_save_path,'events_images.txt'),events_images[:10*5000])
 
@@ -498,7 +497,7 @@ if __name__ == "__main__":
     print(down_sampling_backward.shape)
 
 
-    packager_path = '/home/yyz/Codes/rpg_vid2e/esim_py/fire_dataset.h5'
+    packager_path = './fire.h5'
 
     with h5py.File(packager_path,'w') as f:
         pass
@@ -518,59 +517,13 @@ if __name__ == "__main__":
 
 
 
-    # packager_path = '/home/yyz/Codes/rpg_vid2e/esim_py/fire.h5'
+    # packager_path = './fire.h5'
     # with h5py.File(packager_path,'r') as f:
     #     def print_structure(name,obj):
     #         print(name)
     #     f.visititems(print_structure)
 
 
-
-
-
-
-
-
-
-
-
-
-
-    # t_start = ts[0]
-    # t_end = ts[-1]
-    # bins = 5
-    # sensor_size = (420, 420)
-
-    # backward = False
-
-    # if backward:
-    #     xs = torch.flip(xs, dims=[0])
-    #     ys = torch.flip(ys, dims=[0])
-    #     ts = torch.flip(t_end - ts + t_start, dims=[0]) # t_end and t_start represent the timestamp range of the events to be flipped, typically the timestamps of two consecutive frames.
-    #     ps = torch.flip(-ps, dims=[0])
-
-
-    # voxel_images = events_to_voxel_torch(xs, ys, ts, ps, bins, device=None, sensor_size=sensor_size)
-    # normed_voxel_images = voxel_normalization(voxel_images)
-    
-
-
-
-
-
-    # np.savetxt(os.path.join(events_images_save_path,'voxel_images.txt'),voxel_images.reshape(-1,voxel_images.shape[1]*voxel_images.shape[2]))
-    # np.savetxt(os.path.join(events_images_save_path,'normed_voxel_images.txt'),normed_voxel_images.reshape(-1,normed_voxel_images.shape[1]*normed_voxel_images.shape[2]))
-
-    # print(normed_voxel_images.shape)
-
-
-
-
-
-    # for img in render_events(events_images):
-    #     cv2.imshow("img", img)
-    #     if cv2.waitKey(0) & 0xFF == 27:  # 如果按下的是Esc键
-    #         break
 
 
    

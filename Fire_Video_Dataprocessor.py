@@ -326,7 +326,7 @@ if __name__ == "__main__":
     ps = torch.from_numpy(events_images[:, 3].astype(np.int32)).reshape(-1, 1)
     t_start = ts[0]
     t_end = ts[-1]
-    bins = 5
+    bins = 5												### 设置为 5 个桶
     sensor_size = (420, 420)
 
     backward = False

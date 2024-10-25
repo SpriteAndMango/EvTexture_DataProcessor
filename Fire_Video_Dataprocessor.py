@@ -274,6 +274,8 @@ def save_events_images(events_images,output_folder,num=10,count=5000,shape=[420,
 
 
 if __name__ == "__main__":
+
+	
     Cp = random.uniform(config_video['CT_range'][0], config_video['CT_range'][1])
     Cn = random.gauss(config_video['mu'], config_video['sigma']) * Cp
     Cp = min(max(Cp, config_video['min_CT']), config_video['max_CT'])
@@ -286,16 +288,16 @@ if __name__ == "__main__":
 
 
 
-    fire_xiaojie_path = "/home/yyz/Codes/rpg_vid2e/esim_py/fire_xiaojie.mp4"
-    output_folder = '/home/yyz/Codes/rpg_vid2e/esim_py/video_to_images/'
-    # video_to_images(fire_xiaojie_path,output_folder)
+    fire_xiaojie_path = "./fire_xiaojie.mp4"
+    output_folder = './Fire_Original_Dataset/'			
+    video_to_images(fire_xiaojie_path,output_folder)			### Generate 140 pictures
 
     video_frames = 140
     video_time = 6
     fps = video_frames / video_time
 
     start_time = round(0.0,4)
-    interval = round(1/(4*fps),4)
+    interval = round(1/(4*fps),4)					### 扩展为4倍帧率
     timestamps = []
 
     for i in range(4*video_frames+1):
@@ -304,18 +306,18 @@ if __name__ == "__main__":
     
 
 
-    image_folder = "/home/yyz/Codes/rpg_vid2e/esim_py/vid_out/"
-    timestamps_file = "/home/yyz/Codes/rpg_vid2e/esim_py/tests/data/images/timestamps.txt"
+    image_folder = "./Fire_Interpolation_Dataset/"
+    timestamps_file = "./video_timestamps.txt"
     
     with open(timestamps_file, 'w') as f:
         for ts in timestamps:
             f.write(f"{ts}\n")
     f.close()
 
-    events_images = esim.generateFromFolder(image_folder, timestamps_file) # Generate events with shape [N, 4]
-    events_images_save_path = "/home/yyz/Codes/rpg_vid2e/esim_py/events_images/"
-    # save_events_images(events_images,events_images_save_path)
-    np.savetxt(os.path.join(events_images_save_path,'events_images.txt'),events_images[:10*5000])
+    events_images = esim.generateFromFolder(image_folder, timestamps_file) 				# Generate events with shape [N, 4]
+    events_images_save_path = "./Results/"
+    save_events_images(events_images,events_images_save_path)						### 保存10张事件图片， 每张事件图片由5000个events累加而成
+    np.savetxt(os.path.join(events_images_save_path,'events_images.txt'),events_images[:10*5000])	### 将10*5000组事件数据保存下来
 
 
     xs = torch.from_numpy(events_images[:, 0].astype(np.int32)).reshape(-1, 1)
@@ -338,7 +340,7 @@ if __name__ == "__main__":
 
     voxel_images = events_to_voxel_torch(xs, ys, ts, ps, bins, device=None, sensor_size=sensor_size)
     normed_voxel_images = voxel_normalization(voxel_images)
-    # voxel_images_save_path = "/home/yyz/Codes/rpg_vid2e/esim_py/voxel_images/"
+    
     np.savetxt(os.path.join(events_images_save_path,'voxel_images.txt'),voxel_images.reshape(-1,voxel_images.shape[1]*voxel_images.shape[2]))
     np.savetxt(os.path.join(events_images_save_path,'normed_voxel_images.txt'),normed_voxel_images.reshape(-1,normed_voxel_images.shape[1]*normed_voxel_images.shape[2]))
 
@@ -348,7 +350,7 @@ if __name__ == "__main__":
 
 
 
-    for img in render_events(events_images):
+    for img in render_events(events_images,5000,[420,420]):
         cv2.imshow("img", img)
         if cv2.waitKey(0) & 0xFF == 27:  # 如果按下的是Esc键
             break

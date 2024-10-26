@@ -332,7 +332,7 @@ class hdf5_packager(packager):
         self.append_to_dataset(self.event_ps, ps)
 
     def package_image(self, image, timestamp, img_idx):
-        image_dset = self.events_file.create_dataset("images/{:06d}".format(img_idx),
+        image_dset = self.events_file.create_dataset("images/{:06d}".format(img_idx),					### 原代码是 {image/:{09d}}与EvTexture model要求的不符故做了修改
                 data=image, dtype=np.dtype(np.uint8))
         image_dset.attrs['size'] = image.shape
         image_dset.attrs['timestamp'] = timestamp
@@ -437,6 +437,7 @@ def add_voxel_to_hdf5(hdf5_path,segment_voxel,segment_voxel_b):
 
 
 if __name__ == "__main__":
+	
     Cp = random.uniform(config_video['CT_range'][0], config_video['CT_range'][1])
     Cn = random.gauss(config_video['mu'], config_video['sigma']) * Cp
     Cp = min(max(Cp, config_video['min_CT']), config_video['max_CT'])
@@ -449,130 +450,133 @@ if __name__ == "__main__":
 
 
 
-    # fire_xiaojie_path = "/home/yyz/Codes/rpg_vid2e/esim_py/fire_xiaojie.mp4"
-    # output_folder = '/home/yyz/Codes/rpg_vid2e/esim_py/video_to_images/'
-    # # video_to_images(fire_xiaojie_path,output_folder)
+     fire_xiaojie_path = "./fire_xiaojie.mp4"
+     output_folder = './Fire_Original_Dataset/'	
+     # video_to_images(fire_xiaojie_path,output_folder)
 
-    # video_frames = 140
-    # video_time = 6
-    # fps = video_frames / video_time
-    # start_time = round(0.0,4)
-    # interval = round(1/(4*fps),4)
-    # timestamps = []
 
-    # for i in range(4*video_frames+1):
-    #     timestamp = start_time + i * interval
-    #     timestamps.append(round(timestamp, 4))
+
+
+###  生成时间戳
+
+     video_frames = 140
+     video_time = 6
+     fps = video_frames / video_time
+     start_time = round(0.0,4)
+     interval = round(1/(4*fps),4)
+     timestamps = []
+
+     for i in range(4*video_frames+1):
+         timestamp = start_time + i * interval
+         timestamps.append(round(timestamp, 4))
     
 
-
-    # image_folder = "/home/yyz/Codes/rpg_vid2e/esim_py/vid_out/"
-    # timestamps_file = "/home/yyz/Codes/rpg_vid2e/esim_py/tests/data/images/timestamps.txt"
+     image_folder = "./Fire_Interpolation_Dataset/"
+     timestamps_file = "./video_timestamps.txt"
     
-    # # with open(timestamps_file, 'w') as f:
-    # #     for ts in timestamps:
-    # #         f.write(f"{ts}\n")
-    # # f.close()
-
-    # events_images = esim.generateFromFolder(image_folder, timestamps_file) # Generate events with shape [N, 4]
-    # # events_images_save_path = "/home/yyz/Codes/rpg_vid2e/esim_py/events_images/"
-    # # save_events_images(events_images,events_images_save_path)
-    # # np.savetxt(os.path.join(events_images_save_path,'events_images.txt'),events_images[:10*5000])
-
-    # # xs = events_images[:,0]
-    # # ys = events_images[:,1]
-    # # ts = events_images[:,2]
-    # # ps = events_images[:,3]
-
-    # xs = torch.from_numpy(events_images[:, 0].astype(np.int32))
-    # ys = torch.from_numpy(events_images[:, 1].astype(np.int32))
-    # ts = torch.from_numpy(events_images[:, 2].astype(np.float32))
-    # ps = torch.from_numpy(events_images[:, 3].astype(np.int32))
+     # with open(timestamps_file, 'w') as f:
+     #     for ts in timestamps:
+     #         f.write(f"{ts}\n")
+     # f.close()
 
 
-    # backward = True
-    # t_start = ts[0]
-    # t_end = ts[-1]
+###   为  “图片序列” 生成 events
 
-    # if backward:
-    #     xs_b = torch.flip(xs, dims=[0])
-    #     ys_b = torch.flip(ys, dims=[0])
-    #     ts_b = torch.flip(t_end - ts + t_start, dims=[0]) # t_end and t_start represent the timestamp range of the events to be flipped, typically the timestamps of two consecutive frames.
-    #     ps_b = torch.flip(-ps, dims=[0])
+     events_images = esim.generateFromFolder(image_folder, timestamps_file) # Generate events with shape [N, 4]
+
+
+###   获得前向与反向的 （xs,ys,ts,ps）
+
+     xs = torch.from_numpy(events_images[:, 0].astype(np.int32))
+     ys = torch.from_numpy(events_images[:, 1].astype(np.int32))
+     ts = torch.from_numpy(events_images[:, 2].astype(np.float32))
+     ps = torch.from_numpy(events_images[:, 3].astype(np.int32))
+
+     backward = True
+     t_start = ts[0]
+     t_end = ts[-1]
+
+     if backward:
+         xs_b = torch.flip(xs, dims=[0])
+         ys_b = torch.flip(ys, dims=[0])
+         ts_b = torch.flip(t_end - ts + t_start, dims=[0]) # t_end and t_start represent the timestamp range of the events to be flipped, typically the timestamps of two consecutive frames.
+         ps_b = torch.flip(-ps, dims=[0])
 
   
 
-    # time_min = ts.min()
-    # time_max = ts.max()
-    # seg_length = (time_max-time_min)/560
+###   根据时间戳，为相邻帧 生成 event ； 最终关于forward与backward 分别获得两个列表，长度为 帧数-1 
 
-    # time_interval = [(time_min+i*seg_length,time_min+(i+1)*seg_length) for i in range(560)]
+     time_min = ts.min()
+     time_max = ts.max()
+     seg_length = (time_max-time_min)/560
+
+     time_interval = [(time_min+i*seg_length,time_min+(i+1)*seg_length) for i in range(560)]
     
-    # segmented_events = []
-    # segmented_events_b = []
-    # for time_start,time_end in time_interval:
-    #     mask = (ts>time_start) & (ts<time_end)
-    #     events_in_segment = (xs[mask],ys[mask],ts[mask],ps[mask])
-    #     # events_in_segment = (torch.from_numpy(xs[mask].astype(np.int32)),torch.from_numpy(ys[mask].astype(np.int32)),
-    #     #                      torch.from_numpy(ts[mask].astype(np.int32)),torch.from_numpy(ps[mask].astype(np.int32)))
-    #     mask_b = (ts_b>time_start) & (ts_b<time_end)
-    #     events_in_segment_b = (xs_b[mask_b],ys_b[mask_b],ts_b[mask_b],ps_b[mask_b])
-    #     segmented_events.append(events_in_segment) 
-    #     segmented_events_b.append(events_in_segment_b)       
+     segmented_events = []
+     segmented_events_b = []
+     for time_start,time_end in time_interval:
+         mask = (ts>time_start) & (ts<time_end)
+         events_in_segment = (xs[mask],ys[mask],ts[mask],ps[mask])
+         mask_b = (ts_b>time_start) & (ts_b<time_end)
+         events_in_segment_b = (xs_b[mask_b],ys_b[mask_b],ts_b[mask_b],ps_b[mask_b])
+         segmented_events.append(events_in_segment) 
+         segmented_events_b.append(events_in_segment_b)       
 
-
-    
-    # print(len(segmented_events))
-    # print(len(segmented_events_b))
-
-
-    # bins = 5
-    # sensor_size = [420,420]
-    # segmented_voxel = []
-    # for event in segmented_events:
-    #     voxel_data = events_to_voxel_torch(event[0],event[1],event[2],event[3],bins,device=None,sensor_size=sensor_size)
-    #     normed_voxel_data = voxel_normalization(voxel_data)
-    #     segmented_voxel.append(normed_voxel_data)
-    
-    # print(len(segmented_voxel))
-    # print('segmented_voxel finished')
-
-    # segmented_voxel_b = []
-    # for event in segmented_events_b:
-    #     voxel_data = events_to_voxel_torch(event[0],event[1],event[2],event[3],bins,device=None,sensor_size=sensor_size)
-    #     normed_voxel_data = voxel_normalization(voxel_data)
-    #     segmented_voxel_b.append(normed_voxel_data)
-
-    # print('segmented_voxel_b finished')
-
-
-    packager_path = '/home/yyz/Codes/EvTexture/datasets/fire.h5'
-
-
-    # if os.path.exists(packager_path):
-    #     os.remove(packager_path)
-
-
-    # with h5py.File(packager_path,'w') as f:
-    #     pass
 
     
-    # packager = hdf5_packager(packager_path)
+     print(len(segmented_events))
+     print(len(segmented_events_b))
 
-    # for img_idx,img_name in enumerate(sorted(os.listdir(image_folder))):
-    #     img_path = os.path.join(image_folder,img_name)
-    #     img = cv2.imread(img_path)
-    #     packager.package_image(img,timestamps[img_idx],img_idx)
+
+###   生成为 上述相邻帧的每个 event 生成 voxel 数据，同样地返回两个列表，每个列表的长度为 帧数-1， 每个元素shape为 （bins,H,W）即 （5,420,420）
+
+     bins = 5
+     sensor_size = [420,420]
+     segmented_voxel = []
+     for event in segmented_events:
+         voxel_data = events_to_voxel_torch(event[0],event[1],event[2],event[3],bins,device=None,sensor_size=sensor_size)
+         normed_voxel_data = voxel_normalization(voxel_data)
+         segmented_voxel.append(normed_voxel_data)
     
-    # # packager.package_events(xs,ys,ts,ps)
+     print(len(segmented_voxel))
+     print('segmented_voxel finished')
+
+     segmented_voxel_b = []
+     for event in segmented_events_b:
+         voxel_data = events_to_voxel_torch(event[0],event[1],event[2],event[3],bins,device=None,sensor_size=sensor_size)
+         normed_voxel_data = voxel_normalization(voxel_data)
+         segmented_voxel_b.append(normed_voxel_data)
+
+     print('segmented_voxel_b finished')
 
 
-    # # add_voxel_to_hdf5(packager_path,down_sampling,down_sampling_backward)
+###   生成一个 hdf5 格式的文件
+
+    packager_path = '.Results/fire_h5_file.h5'
+
+     if os.path.exists(packager_path):
+         os.remove(packager_path)
 
 
-    # add_voxel_to_hdf5(packager_path,segmented_voxel,segmented_voxel_b)
+     with h5py.File(packager_path,'w') as f:
+         pass
+
+    
+     packager = hdf5_packager(packager_path)
+
+###   将 images（560张） 添加到 hdf5 中
+
+     for img_idx,img_name in enumerate(sorted(os.listdir(image_folder))):
+         img_path = os.path.join(image_folder,img_name)
+         img = cv2.imread(img_path)
+         packager.package_image(img,timestamps[img_idx],img_idx)
+    
+
+###   将 forwar与 backward 的 voxel 数据添加到 hdf5中
+     add_voxel_to_hdf5(packager_path,segmented_voxel,segmented_voxel_b)
 
 
+###   查看 hdf5 文件的数据结构
 
     with h5py.File(packager_path,'r') as f:
         def print_structure(name,obj,paths):
@@ -582,94 +586,6 @@ if __name__ == "__main__":
         print(' '.join(paths))
 
 
-
-
-    # # down_sampling = torch.nn.functional.interpolate(normed_voxel_data.unsqueeze(0),scale_factor=0.5,mode='bilinear').squeeze()
-  
-
-    # voxel_data_backward = events_to_voxel_torch(xs,ys,ts,ps,bins,device=None,sensor_size=sensor_size)
-    # normed_voxel_data_backward = voxel_normalization(voxel_data_backward)
-    # # down_sampling_backward = torch.nn.functional.interpolate(normed_voxel_data_backward.unsqueeze(0),scale_factor=0.5,mode='bilinear').squeeze()
-    # # print(down_sampling_backward.shape)
-    # print(normed_voxel_data_backward.shape)
-
-
-    # packager_path = '/home/yyz/Codes/rpg_vid2e/esim_py/fire_dataset.h5'
-
-    # with h5py.File(packager_path,'w') as f:
-    #     pass
-
-
-    # packager = hdf5_packager(packager_path)
-
-    # for img_idx,img_name in enumerate(sorted(os.listdir(image_folder))):
-    #     img_path = os.path.join(image_folder,img_name)
-    #     img = cv2.imread(img_path)
-    #     packager.package_image(img,timestamps[img_idx],img_idx)
-    
-    # # packager.package_events(xs,ys,ts,ps)
-
-
-    # # add_voxel_to_hdf5(packager_path,down_sampling,down_sampling_backward)
-
-
-    # add_voxel_to_hdf5(packager_path,normed_voxel_data,normed_voxel_data_backward)
-
-
-
-    # packager_path = '/home/yyz/Codes/rpg_vid2e/esim_py/fire_dataset.h5'
-    # with h5py.File(packager_path,'r') as f:
-    #     def print_structure(name,obj):
-    #         print(name)
-    #     f.visititems(print_structure)
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # t_start = ts[0]
-    # t_end = ts[-1]
-    # bins = 5
-    # sensor_size = (420, 420)
-
-    # backward = False
-
-    # if backward:
-    #     xs = torch.flip(xs, dims=[0])
-    #     ys = torch.flip(ys, dims=[0])
-    #     ts = torch.flip(t_end - ts + t_start, dims=[0]) # t_end and t_start represent the timestamp range of the events to be flipped, typically the timestamps of two consecutive frames.
-    #     ps = torch.flip(-ps, dims=[0])
-
-
-    # voxel_images = events_to_voxel_torch(xs, ys, ts, ps, bins, device=None, sensor_size=sensor_size)
-    # normed_voxel_images = voxel_normalization(voxel_images)
-    
-
-
-
-
-
-    # np.savetxt(os.path.join(events_images_save_path,'voxel_images.txt'),voxel_images.reshape(-1,voxel_images.shape[1]*voxel_images.shape[2]))
-    # np.savetxt(os.path.join(events_images_save_path,'normed_voxel_images.txt'),normed_voxel_images.reshape(-1,normed_voxel_images.shape[1]*normed_voxel_images.shape[2]))
-
-    # print(normed_voxel_images.shape)
-
-
-
-
-
-    # for img in render_events(events_images):
-    #     cv2.imshow("img", img)
-    #     if cv2.waitKey(0) & 0xFF == 27:  # 如果按下的是Esc键
-    #         break
 
 
    

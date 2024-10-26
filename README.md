@@ -16,6 +16,10 @@ Fire_Interpolation_Dataset : 对原140张图片进行插帧（4倍帧率），�
 最终得到 hdf5 文件，其数据结构为：
 
 <img width="486" alt="image" src="https://github.com/user-attachments/assets/7ee6f5ad-eb01-46eb-87a1-13858e2bd70c">
+![截图 2024-10-26 17-33-02](https://github.com/user-attachments/assets/1baae5ce-ffdc-4016-b86f-3bbf4b5613cc)
+![截图 2024-10-26 17-32-47](https://github.com/user-attachments/assets/f197ec10-4226-49e0-8bec-bd6921c65906)
+![截图 2024-10-26 17-33-28](https://github.com/user-attachments/assets/d2a836a4-7c8f-4b98-9e8b-f051f24e1dde)
+
 
 
  # Run Results

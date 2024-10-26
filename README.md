@@ -1,9 +1,3 @@
-![截图 2024-10-26 17-38-36](https://github.com/user-attachments/assets/0e8256a1-b50c-4c00-bf72-5aa46acd5ef8)# EvTexture_DataProcessor
-
-The original_dataset : REDS dataset/Lower Resolution/test_sharp_bcubic/000   (100 pictures)
-
-The frame_interpolation_dataset : use pretrained RIFE to interpolate frames  (397 pictures)
-
 # 处理 fire_xiaojie.mp4 数据
 
 处理 fire_xiaojie.mp4 数据的程序在 Fire_Video_Dataprocessor.py中
@@ -47,6 +41,8 @@ Fire_Interpolation_Dataset : 对原140张图片进行插帧（4倍帧率），�
 
  # Run Results
  获得上述 hdf5文件后 模型能够成功运行，然而却报错 “电脑的CUDA内存不足，错误信息显示，程序试图分配4.78GiB的内存，然而GPU只有487.44MiB的闲置空间”，具体如下图：
+![截图 2024-10-26 17-38-36](https://github.com/user-attachments/assets/0e8256a1-b50c-4c00-bf72-5aa46acd5ef8)# EvTexture_DataProcessor
+![截图 2024-10-26 17-39-05](https://github.com/user-attachments/assets/02e41482-3956-434b-84d5-0e6498697682)
 
 
  
